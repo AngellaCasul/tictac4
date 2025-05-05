@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic-Tac-4 - Welcome</title> 
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      /* background: #232323; */ /* Defaulting to light, controlled by CSS vars */
+      /* color: white; */ /* Defaulting to light, controlled by CSS vars */
+      text-align: center;
+      padding: 20px;
+      opacity: 0;
+      animation: fadeIn 0.5s ease-in forwards;
+      transition: background 0.3s, color 0.3s;
+      background-color: var(--bg-color); /* Use CSS variable */
+      color: var(--text-color); /* Use CSS variable */
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      margin-bottom: 20px; /* Increased margin */
+    }
+
+    #content-wrapper { /* Added wrapper for centering content */
+        max-width: 650px;
+        margin: 20px auto;
+        padding: 25px;
+        background-color: var(--box-bg-light); /* Use CSS var */
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        color: var(--text-color); /* Ensure text inside box respects theme */
+    }
+
+    #instructions {
+      /* max-width: 600px; */ /* Removed, handled by wrapper */
+      /* margin: 0 auto 20px auto; */ /* Adjusted margin */
+      margin-bottom: 25px;
+      font-size: 17px; /* Slightly adjusted */
+      /* background: #444; */ /* Removed, handled by wrapper */
+      /* padding: 15px; */ /* Removed, handled by wrapper */
+      /* border-radius: 12px; */ /* Removed, handled by wrapper */
+      /* box-shadow: 0 0 8px rgba(0, 0, 0, 0.1); */ /* Removed, handled by wrapper */
+      /* color: #ccc; */ /* Removed, handled by wrapper */
+      line-height: 1.6;
+      text-align: left; /* Better readability for instructions */
+    }
+     #instructions strong {
+         color: var(--emphasis-color, #007bff); /* Use variable for emphasis */
+     }
+
+    /* Style for the game options section */
+    #game-options {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+         background-color: rgba(0,0,0,0.05); /* Subtle background */
+         border-radius: 8px;
+    }
+
+    label {
+        margin-right: 10px;
+        font-weight: bold;
+    }
+
+     select, button {
+        padding: 10px 18px;
+        font-size: 16px;
+        margin: 10px 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+    select {
+         background-color: var(--input-bg, #fff);
+         color: var(--input-text, #333);
+    }
+
+    button#start-button { /* Specific ID for start button */
+      /* padding: 10px 20px; */
+      /* font-size: 16px; */
+      margin-top: 10px;
+      border: none;
+      border-radius: 5px;
+      background: var(--button-bg-positive, #5cb85c); /* Use var */
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button#start-button:hover {
+      background: var(--button-bg-positive-hover, #4cae4c); /* Use var */
+    }
+
+    .note {
+         display: block; /* Ensure it takes its own line */
+         font-size: 0.9em;
+         color: var(--text-color-muted, #666); /* Use var */
+         margin-top: 8px;
+    }
+
+
+    #home-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: var(--button-nav-bg, #fff); /* Use var */
+      border: 2px solid var(--button-nav-border, #ccc); /* Use var */
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      text-align: center;
+      line-height: 41px; /* Adjusted for border */
+      font-size: 20px;
+      text-decoration: none;
+      color: var(--button-nav-text, #333); /* Use var */
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    #home-button:hover {
+      background-color: var(--button-nav-bg-hover, #f1f1f1); /* Use var */
+    }
+
+    /* --- Theme Variables --- */
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --text-color-muted: #666666;
+      --box-bg-light: #f8f9fa; /* Lighter box background */
+      --button-bg-positive: #28a745; /* Green button */
+      --button-bg-positive-hover: #218838;
+      --button-nav-bg: #ffffff;
+      --button-nav-border: #ccc;
+      --button-nav-text: #333;
+      --button-nav-bg-hover: #f1f1f1;
+      --input-bg: #fff;
+      --input-text: #333;
+      --theme-toggle-bg: #fff;
+      --theme-toggle-border: #ccc;
+      --theme-toggle-text: #333;
+      --emphasis-color: #0056b3; /* Darker blue for emphasis */
+    }
+
+    body.dark {
+      --bg-color: #1a1a1a; /* Slightly lighter dark */
+      --text-color: #e0e0e0;
+      --text-color-muted: #aaaaaa;
+      --box-bg-light: #2c2c2c; /* Darker box */
+      --button-bg-positive: #3a9a50; /* Dark mode green */
+      --button-bg-positive-hover: #2e7d40;
+      --button-nav-bg: #333;
+      --button-nav-border: #555;
+      --button-nav-text: #e0e0e0;
+      --button-nav-bg-hover: #444;
+      --input-bg: #333;
+      --input-text: #e0e0e0;
+      --theme-toggle-bg: #333;
+      --theme-toggle-border: #555;
+      --theme-toggle-text: #e0e0e0;
+      --emphasis-color: #5cadff; /* Lighter blue for dark mode */
+    }
+    /* --- End Theme Variables --- */
+
+    #theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: var(--theme-toggle-bg);
+      border: 2px solid var(--theme-toggle-border);
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      font-size: 20px;
+      color: var(--theme-toggle-text);
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s, border-color 0.3s;
+
+      /* Centering with flex */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+
+     /* No need for body.dark #theme-toggle specific rule if using variables */
+
+  </style>
+</head>
+<body>
+  <a href="homepage.html" id="home-button" title="Go to Home Page">🏠</a> <button id="theme-toggle" title="Toggle Light/Dark Mode">🌙</button>
+  <h1>Tic-Tac-4</h1>
+
+  <div id="content-wrapper">
+      <div id="instructions">
+        Welcome to <strong>Tic-Tac-4</strong>! 🎉<br><br>
+        🔸 The goal is to connect <strong>4 pieces in a row</strong> — horizontally, vertically, or diagonally.<br>
+        🔸 Click on a column to drop your piece into the lowest available spot.<br>
+        🔸 You will play against an AI opponent.<br>
+        🔸 Choose your symbol below. Player 'X' always makes the first move.<br>
+        🔸 If the board fills up with no winner, it’s a draw.<br><br>
+        💡 Tip: Plan ahead and try to block the AI's winning moves!
+      </div>
+
+      <div id="game-options">
+          <label for="player-choice">Choose your symbol:</label>
+          <select id="player-choice">
+              <option value="X" selected>Play as X (Go First)</option>
+              <option value="O">Play as O (Go Second)</option>
+          </select>
+          </div>
+          <br>
+          <label for="difficulty">Select difficulty:</label>
+            <select id="difficulty">
+              <option value="easy">Easy</option>
+              <option value="medium" selected>Medium</option>
+              <option value="hard">Hard</option>
+            </select>
+          
+      <button id="start-button" onclick="startGame()">Start Game</button>
+  </div>
+
+  <script>
+    const themeToggle = document.getElementById("theme-toggle");
+    const body = document.body; // Cache body element
+
+    // Function to apply theme based on localStorage or system preference
+    function applyTheme(theme) {
+        if (theme === "dark") {
+            body.classList.add("dark");
+            themeToggle.textContent = "☀️";
+            localStorage.setItem("theme", "dark");
+        } else {
+            body.classList.remove("dark");
+            themeToggle.textContent = "🌙";
+            localStorage.setItem("theme", "light");
+        }
+    }
+
+    // Initialize theme on load
+    const savedTheme = localStorage.getItem("theme");
+    // Optional: Check system preference if no theme is saved
+    // const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(savedTheme /* || (prefersDark ? 'dark' : 'light') */ );
+
+
+    themeToggle.addEventListener("click", () => {
+        const currentTheme = body.classList.contains("dark") ? "dark" : "light";
+        applyTheme(currentTheme === "dark" ? "light" : "dark");
+    });
+
+    // Function to start the game
+    function startGame() {
+    const playerChoice = document.getElementById('player-choice').value;
+    const difficulty = document.getElementById('difficulty').value;
+    const gamePageUrl = 'index.html';
+
+    window.location.href = `${gamePageUrl}?player=${playerChoice}&difficulty=${difficulty}`;
+}
+
+  </script>
+</body>
+</html>

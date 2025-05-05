@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic-Tac-4</title>
+  <style>
+    :root {
+  --bg-color: #ffffff;
+  --text-color: #000000;
+  --board-bg: #f0f0f0;
+  --cell-border: #ccc;
+  --cell-bg: #eee;
+  --cell-x-color: #ff6666;
+  --cell-o-color: #6699ff;
+}
+
+body.dark {
+  --bg-color: #121212;
+  --text-color: #ffffff;
+  --board-bg: #1e1e1e;
+  --cell-border: #444;
+  --cell-bg: #333;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  text-align: center;
+  padding: 20px;
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in forwards;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes falling {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.falling {
+  animation: falling 0.5s ease-out;
+}
+
+h1 {
+  margin-bottom: 10px;
+}
+
+#board {
+  display: grid;
+  grid-template-columns: repeat(6, 60px);
+  grid-template-rows: repeat(6, 60px);
+  gap: 5px;
+  justify-content: center;
+  margin: 20px auto;
+}
+
+.cell {
+  width: 60px;
+  height: 60px;
+  background: var(--cell-bg);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.3s, color 0.3s;
+}
+
+.cell.X {
+  color: var(--cell-x-color);
+}
+
+.cell.O {
+  color: var(--cell-o-color);
+}
+
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 5px;
+  background: #333;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+button:hover {
+  background: #555;
+  transform: scale(1.1);
+}
+
+button:active {
+  transform: scale(1);
+}
+
+#theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: #fff;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  font-size: 20px;
+  color: #000; /* default for light mode */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+body.dark #theme-toggle {
+  background-color: #333;
+  color: #fff;
+}
+
+#theme-toggle:hover {
+  background-color: #555;
+  transform: scale(1.1);
+}
+
+#theme-toggle:active {
+  transform: scale(1);
+}
+
+#home-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: #ffffff;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  text-align: center;
+  line-height: 45px;
+  font-size: 20px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: background 0.2s ease;
+}
+
+#home-button:hover {
+  background-color: #f1f1f1;
+}
+
+
+  </style>
+</head>
+<body>
+  <a href="homepage.html" id="home-button" title="Go to Home Page">🏠</a>
+  <button id="theme-toggle" title="Toggle Light/Dark Mode">🌙</button>
+  <h1>Tic-Tac-4</h1>
+  <div id="board"></div>
+  <div id="status">Player X's turn</div>
+  <button onclick="resetGame()">Reset Game</button>
+
+  <script>
+    const themeToggle = document.getElementById("theme-toggle");
+    const body = document.body;
+  
+    function applyTheme(theme) {
+      if (theme === "dark") {
+        body.classList.add("dark");
+        themeToggle.textContent = "☀️";
+        localStorage.setItem("theme", "dark");
+      } else {
+        body.classList.remove("dark");
+        themeToggle.textContent = "🌙";
+        localStorage.setItem("theme", "light");
+      }
+      updateThemeForCells();
+      updateThemeForButtons();
+    }
+  
+    const savedTheme = localStorage.getItem("theme") || 'light';
+    applyTheme(savedTheme);
+  
+    themeToggle.addEventListener("click", () => {
+      const currentTheme = body.classList.contains("dark") ? "dark" : "light";
+      applyTheme(currentTheme === "dark" ? "light" : "dark");
+    });
+  
+    const ROWS = 6;
+    const COLS = 6;
+    let board = [];
+    let PLAYER;
+    let AI;
+    let currentPlayer;
+    let gameOver = false;
+    let difficulty;
+  
+    const boardDiv = document.getElementById('board');
+    const statusDiv = document.getElementById('status');
+  
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+  
+    const chosenPlayerSymbol = getQueryParam('player');
+    difficulty = getQueryParam('difficulty') || 'medium';
+  
+    if (chosenPlayerSymbol === 'O') {
+      PLAYER = 'O';
+      AI = 'X';
+    } else {
+      PLAYER = 'X';
+      AI = 'O';
+    }
+    currentPlayer = 'X';
+  
+    console.log(`Game Started: Player is ${PLAYER}, AI is ${AI}, Difficulty: ${difficulty}`);
+  
+    function createBoard() {
+      board = Array.from({ length: ROWS }, () => Array(COLS).fill(''));
+      boardDiv.innerHTML = '';
+  
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.addEventListener('click', () => handleClick(c));
+          boardDiv.appendChild(cell);
+        }
+      }
+  
+      applyThemeStyles();
+      gameOver = false;
+      boardDiv.style.pointerEvents = 'auto';
+      updateStatus();
+  
+      if (currentPlayer === AI) {
+        statusDiv.textContent = `AI (${AI}) is thinking...`;
+        boardDiv.style.pointerEvents = 'none';
+        setTimeout(() => {
+          aiMove();
+          if (!gameOver) boardDiv.style.pointerEvents = 'auto';
+        }, 750);
+      }
+    }
+  
+    function updateStatus() {
+      if (gameOver) return;
+      if (currentPlayer === PLAYER) {
+        statusDiv.textContent = `Your turn (Player ${PLAYER})`;
+      } else {
+        statusDiv.textContent = `AI (${AI})'s turn`;
+      }
+    }
+  
+    function handleClick(col) {
+      if (gameOver || currentPlayer !== PLAYER) return;
+      const row = findLowestEmptyRow(board, col);
+      if (row !== -1) {
+        board[row][col] = PLAYER;
+        updateBoardVisualization(row, col);
+        if (checkWin(board, row, col)) {
+          statusDiv.textContent = `You (Player ${PLAYER}) win! 🎉`;
+          gameOver = true;
+          triggerConfetti();
+        } else if (isBoardFull(board)) {
+          statusDiv.textContent = "It's a draw!";
+          gameOver = true;
+        } else {
+          currentPlayer = AI;
+          statusDiv.textContent = `AI (${AI}) is thinking...`;
+          boardDiv.style.pointerEvents = 'none';
+          setTimeout(() => {
+            aiMove();
+            if (!gameOver) boardDiv.style.pointerEvents = 'auto';
+          }, 500);
+        }
+      }
+    }
+  
+    function aiMove() {
+      if (gameOver) return;
+      const col = findBestMove();
+      if (col === -1) {
+        console.warn("AI could not find a valid move.");
+        if (isBoardFull(board)) {
+          statusDiv.textContent = "It's a draw!";
+          gameOver = true;
+        }
+        return;
+      }
+  
+      const row = findLowestEmptyRow(board, col);
+      if (row !== -1) {
+        board[row][col] = AI;
+        updateBoardVisualization(row, col);
+        if (checkWin(board, row, col)) {
+          statusDiv.textContent = `AI (${AI}) wins! 😞`;
+          gameOver = true;
+        } else if (isBoardFull(board)) {
+          statusDiv.textContent = "It's a draw!";
+          gameOver = true;
+        } else {
+          currentPlayer = PLAYER;
+          updateStatus();
+        }
+      } else {
+        console.error(`AI Logic Error: Chose column ${col}, but it's full.`);
+      }
+    }
+  
+    function findBestMove() {
+      const availableCols = getAvailableColumns(board);
+      if (availableCols.length === 0) return -1;
+  
+      if (difficulty === 'easy') {
+        const randomCol = availableCols[Math.floor(Math.random() * availableCols.length)];
+        console.log("AI (easy) chose random:", randomCol);
+        return randomCol;
+      }
+  
+      for (const col of availableCols) {
+        const row = findLowestEmptyRow(board, col);
+        const tempBoard = createBoardCopy(board);
+        if (row !== -1) {
+          tempBoard[row][col] = AI;
+          if (checkWin(tempBoard, row, col)) {
+            return col;
+          }
+        }
+      }
+  
+      for (const col of availableCols) {
+        const row = findLowestEmptyRow(board, col);
+        const tempBoard = createBoardCopy(board);
+        if (row !== -1) {
+          tempBoard[row][col] = PLAYER;
+          if (checkWin(tempBoard, row, col)) {
+            return col;
+          }
+        }
+      }
+  
+      const randomCol = availableCols[Math.floor(Math.random() * availableCols.length)];
+      console.log(`AI (${difficulty}) fallback random:`, randomCol);
+      return randomCol;
+    }
+  
+    function createBoardCopy(boardState) {
+      return boardState.map(row => [...row]);
+    }
+  
+    function getAvailableColumns(boardState) {
+      const available = [];
+      for (let c = 0; c < COLS; c++) {
+        if (boardState[0][c] === '') available.push(c);
+      }
+      return available;
+    }
+  
+    function findLowestEmptyRow(boardState, col) {
+      for (let r = ROWS - 1; r >= 0; r--) {
+        if (boardState[r][col] === '') return r;
+      }
+      return -1;
+    }
+  
+    function isBoardFull(boardState) {
+      return getAvailableColumns(boardState).length === 0;
+    }
+  
+    function checkWin(boardState, row, col) {
+      const player = boardState[row][col];
+      if (!player) return false;
+      const directions = [
+        { dr: 0, dc: 1 },
+        { dr: 1, dc: 0 },
+        { dr: 1, dc: 1 },
+        { dr: 1, dc: -1 }
+      ];
+      for (const { dr, dc } of directions) {
+        let count = 1 + countDirection(boardState, row, col, dr, dc, player);
+        count += countDirection(boardState, row, col, -dr, -dc, player);
+        if (count >= 4) return true;
+      }
+      return false;
+    }
+  
+    function countDirection(boardState, r, c, dr, dc, player) {
+      let count = 0;
+      for (let i = 1; i < 4; i++) {
+        const nr = r + dr * i;
+        const nc = c + dc * i;
+        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && boardState[nr][nc] === player) {
+          count++;
+        } else break;
+      }
+      return count;
+    }
+  
+    function updateBoardVisualization(placedRow = -1, placedCol = -1) {
+      const cells = document.querySelectorAll('.cell');
+      cells.forEach(cell => {
+        const r = parseInt(cell.dataset.row);
+        const c = parseInt(cell.dataset.col);
+        const content = board[r][c];
+        if (cell.textContent !== content) {
+          cell.textContent = content;
+          cell.className = 'cell';
+          if (content) {
+            cell.classList.add(content);
+            if (r === placedRow && c === placedCol) {
+              cell.classList.add('falling');
+              cell.addEventListener('animationend', () => {
+                cell.classList.remove('falling');
+              }, { once: true });
+            }
+          }
+        }
+      });
+      applyThemeStyles();
+    }
+  
+    function applyThemeStyles() {
+      updateThemeForCells();
+      updateThemeForButtons();
+    }
+  
+    function updateThemeForCells() {}
+  
+    function updateThemeForButtons() {
+      const resetButton = document.querySelector('button[onclick="resetGame()"]');
+      const homeButton = document.getElementById('home-button');
+    }
+  
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 } });
+      } else {
+        console.warn("Confetti function not found.");
+      }
+    }
+  
+    function resetGame() {
+      const chosenPlayerSymbol = getQueryParam('player');
+      difficulty = getQueryParam('difficulty') || 'medium';
+  
+      if (chosenPlayerSymbol === 'O') {
+        PLAYER = 'O';
+        AI = 'X';
+      } else {
+        PLAYER = 'X';
+        AI = 'O';
+      }
+      currentPlayer = 'X';
+      createBoard();
+    }
+  
+    createBoard();
+  </script>
+  
+
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+</body>
+</html>
